@@ -1,0 +1,127 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Admin {
+  id       String  @id @default(uuid())
+  username String  @unique
+}
+
+model Acesso {
+  id                String     @id @default(uuid())
+  usuarioId         String?
+  tipoAcesso        String
+  permissoes        String[]
+  ultimoAcesso      DateTime?
+  status            String
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  usuario           Aluno?     @relation(fields: [usuarioId], references: [id])
+
+  Instrutor Instrutor[]
+}
+
+model Aluno {
+  id                String     @id @default(uuid())
+  nome              String
+  endereco          String
+  telefone          String
+  cpf               String     @unique
+  dataNascimento    DateTime
+  dataMatricula     DateTime
+  statusInscricao   String
+  email             String     @unique
+  senha             String
+  tipoCarteira      String
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  aulas             Aula[]     // Relacionamento com Aula
+  pagamentos        Pagamento[]
+  exames            Exame[]
+  acessos           Acesso[]
+}
+
+model Instrutor {
+  id                String     @id @default(uuid())
+  nome              String
+  telefone          String
+  cpf               String     @unique
+  endereco          String
+  dataContratacao   DateTime
+  especialidades    String[]
+  email             String     @unique
+  senha             String
+  status            String
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  aulas             Aula[]     // Relacionamento com Aula
+  acessos           Acesso[]
+
+  Exame Exame[]
+}
+
+model Aula {
+  id                String     @id @default(uuid())
+  alunoId           String
+  instrutorId       String
+  veiculoId         String
+  dataHoraInicio    DateTime
+  dataHoraTermino   DateTime
+  tipoAula          String
+  status            String
+  observacoes       String?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  aluno             Aluno      @relation(fields: [alunoId], references: [id])
+  instrutor         Instrutor  @relation(fields: [instrutorId], references: [id])
+  veiculo           Veiculo    @relation(fields: [veiculoId], references: [id])
+}
+
+model Veiculo {
+  id                String     @id @default(uuid())
+  modelo            String
+  placa             String     @unique
+  anoFabricacao     Int
+  status            String
+  dataUltimaManutencao DateTime
+  categoria         String
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  aulas             Aula[]
+}
+
+model Pagamento {
+  id                String     @id @default(uuid())
+  alunoId           String
+  valor             Float
+  dataPagamento     DateTime
+  status            String
+  tipoPagamento     String
+  descricao         String?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  aluno             Aluno      @relation(fields: [alunoId], references: [id])
+}
+
+model Exame {
+  id                String     @id @default(uuid())
+  tipoExame         String
+  dataExame         DateTime
+  status            String
+  nota              Float
+  instrutorId       String
+  alunoId           String
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  instrutor         Instrutor  @relation(fields: [instrutorId], references: [id])
+  aluno             Aluno      @relation(fields: [alunoId], references: [id])
+}
